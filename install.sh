@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 countdown() {
 for i in {5..0}; do
 echo -ne "\r$i"
@@ -8,19 +9,28 @@ done
 echo -ne "\r"
 }
 
+
+# setup
 clear
-echo "please run as root"
+echo "please run as root.\nyou are $USER"
 umount -R /mnt
 lsblk
+echo "which drive would you like to partition?\n"
 read -p " drive name > /dev/" DRVNM
 clear
+
+
+# erase disk
 echo "!WARNING! this action will wipe all data on drive $DRVNM"
 read -p "enter to continue ctrl+c to cancel > "
 DRV="/dev/$DRVNM"
 clear
 echo "wiping drive..."
-#countdown
+countdown
 wipefs -fa $DRV
+
+
+# partition disk
 echo "partitioning..."
 sfdisk -q --force --no-reread "$DRV" <<EOF
 label: gpt
@@ -40,33 +50,42 @@ mkfs.vfat -F32 -n "boot" $BT
 mkfs.btrfs -L artix -f -M -O quota $RT
 mount $RT /mnt
 echo "building subvolumes..."
-btrfs subvolume create /mnt/root
-btrfs subvolume create /mnt/users
-btrfs subvolume create /mnt/containers
-btrfs subvolume create /mnt/virtualmachines
-btrfs subvolume create /mnt/packages
-btrfs subvolume create /mnt/snapshots
-btrfs subvolume create /mnt/logs
-btrfs subvolume create /mnt/cache
-btrfs subvolume create /mnt/temp
-btrfs subvolume create /mnt/swap
+VLCT="btrfs subvolume create /mnt/"
+${VLCT}root
+${VLCT}users
+${VLCT}containers
+${VLCT}virtualmachines
+${VLCT}packages
+${VLCT}snapshots
+${VLCT}logs
+${VLCT}cache
+${VLCT}temp
+${VLCT}swap
+
+
 echo "unmounting btrfs filesystem..."
 umount -R /mnt
+
+
 echo "mounting btrfs subvolumes..."
+
 OPS="compress=zstd:5,noatime"
 OPS2="nodatacow,noatime"
-mount -o subvol=root,$OPS $RT /mnt
+MNTO="mount -o subvol"
+
+${MNTO}root,$OPS $RT /mnt
 mkdir -p /mnt/{home,boot,var/log,var/cache,var/swap,var/snapshots,ops/containers,ops/vmachines,var/tmp}
-mount -o subvol=cache,$OPS $RT /mnt/var/cache
+${MNTO}cache,$OPS $RT /mnt/var/cache
 mkdir -p /mnt/var/cache/pacman/pkg
-mount -o subvol=logs,$OPS $RT /mnt/var/log
-mount -o subvol=users,$OPS $RT /mnt/home
-mount -o subvol=packages,$OPS $RT /mnt/var/cache/pacman/pkg
-mount -o subvol=temp,$OPS $RT /mnt/var/tmp
-mount -o subvol=snapshots,$OPS $RT /mnt/var/snapshots
-mount -o subvol=containers,$OPS2 $RT /mnt/ops/containers
-mount -o subvol=virtualmachines,$OPS2 $RT /mnt/ops/vmachines
-mount -o subvol=swap,$OPS2 $RT /mnt/var/swap
+${MNTO}=logs,$OPS $RT /mnt/var/log
+${MNTO}=users,$OPS $RT /mnt/home
+${MNTO}=packages,$OPS $RT /mnt/var/cache/pacman/pkg
+${MNTO}=temp,$OPS $RT /mnt/var/tmp
+${MNTO}=snapshots,$OPS $RT /mnt/var/snapshots
+${MNTO}=containers,$OPS2 $RT /mnt/ops/containers
+${MNTO}=virtualmachines,$OPS2 $RT /mnt/ops/vmachines
+${MNTO}=swap,$OPS2 $RT /mnt/var/swap
+
 echo "mounting boot..."
 mount $BT /mnt/boot
 echo
