@@ -8,12 +8,26 @@ done
 echo -ne "\r"
 }
 
-flush_fs() {
-echo "flushing $1..."
-fuser -k "/dev/$1"
-partprobe "/dev/$1"
+flush_pt() {
+fuser -k "/dev/$1" 2>/dev/null || true
+partprobe "/dev/$1" 2>/dev/null || true
 sync
-blockdev --flushbufs "/dev/$1"
+blockdev --flushbufs "/dev/$1" 2>/dev/null || true
+}
+
+flush_dv() {
+echo "flushing $1..."
+for part in "${1}"p[0-9]*; do
+if [ -b "$part" ]; then
+flush_pt $part
+fi
+done
+for part in "${1}"[0-9]*; do
+if [ -b "$part" ]; then
+flush_pt $part
+fi
+done
+echo "flushing [done]..."
 }
 
 wipe_fs() {
@@ -23,23 +37,21 @@ read -p "enter to continue ctrl+c to cancel ~ "
 clear
 echo "wiping drive in..."
 countdown_
-flush_fs $1
+flush_dv $1
 wipefs -fa "/dev/$1"
+partprobe "/dev/$1"
+echo "wiping drive [done]..."
 }
 
-unmount_fs() {
-flush_fs
-}
-
-partition_drv() {
+partition_drv() { 
 wipe_fs $1
-
-echo "partitioning..."
+echo "partitioning $1..."
 sfdisk --force --no-reread "/dev/$1" <<EOF
 label: gpt
 type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, size=512MiB
 type=0FC63DAF-8483-4772-8E79-3D69D8477DE4
 EOF
+echo "partitioning $1 [done]..."
 }
 
 #start of script
@@ -49,12 +61,10 @@ echo "note. # represents a placeholder for a number. placeholders for text will 
 echo "what is the name of your drive? ex. sda nvme#n# etc. and not ex. sda# nvme#n#p#"
 read -p "name of device you would like to use ~ " DRV
 echo "using $DRV"
+partition_drv $DRV
 
 
 
-echo "refreshing..."
-partprobe -s $DRV
-echo
 fdisk -l $DRV
 echo "partition number ex: sda# or nvme0n1p#"
 read -p "boot(fat32) > $DRV" BTPT
