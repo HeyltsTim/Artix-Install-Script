@@ -17,14 +17,14 @@ blockdev --flushbufs "/dev/$1" 2>/dev/null || true
 
 flush_dv() {
 echo "flushing $1..."
-for part in "${1}"p[0-9]*; do
-if [ -b "$part" ]; then
-flush_pt $part
+for PART in "${1}"p[0-9]*; do
+if [ -b "$PART" ]; then
+flush_pt $PART
 fi
 done
-for part in "${1}"[0-9]*; do
-if [ -b "$part" ]; then
-flush_pt $part
+for PART in "${1}"[0-9]*; do
+if [ -b "$PART" ]; then
+flush_pt $PART
 fi
 done
 echo "flushing [done]..."
@@ -56,8 +56,8 @@ echo "partitioning $1 [done]..."
 
 #start of script
 echo "if you are not please run as root.\nyou are $USER"
-lsblk -d
-echo "note. # represents a placeholder for a number. placeholders for text will be represented by surrounding it with <>"
+lsblk -dn
+
 echo "what is the name of your drive? ex. sda nvme#n# etc. and not ex. sda# nvme#n#p#"
 read -p "name of device you would like to use ~ " DRV
 echo "using $DRV"
@@ -65,7 +65,7 @@ partition_drv $DRV
 
 
 
-fdisk -l $DRV
+lsblk -ln $DRV
 echo "partition number ex: sda# or nvme0n1p#"
 read -p "boot(fat32) > $DRV" BTPT
 read -p "root(btrfs) > $DRV" RTPT
