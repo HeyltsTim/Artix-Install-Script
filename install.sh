@@ -140,7 +140,7 @@ echo "package install..."
 basestrap -Ki /mnt base sudo vim linux-rt seatd-dinit mkinitcpio \
 amd-ucode linux-firmware-mediatek linux-firmware-amdgpu \
 linux-firmware-realtek turnstile-dinit bash-completion iptables-dinit \
-dhcpcd-dinit btrfs-progs grub-btrfs efibootmgr dosfstools
+dhcpcd-dinit btrfs-progs grub-btrfs efibootmgr dosfstools dbus-dinit dbus-dinit-user
 echo "package install..."
 done_msg
 
