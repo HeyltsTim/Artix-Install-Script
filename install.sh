@@ -87,17 +87,18 @@ echo "formating ${BOOT} as boot & ${ROOT} as root..."
 done_msg
 
 echo "build subvolumes..."
-mount $RT /mnt
+mount $ROOT /mnt
 VLCT="btrfs subvolume create /mnt/"
 ${VLCT}root
 ${VLCT}users
 ${VLCT}containers
 ${VLCT}virtualmachines
+${VLCT}variables
 ${VLCT}packages
 ${VLCT}snapshots
 ${VLCT}logs
 ${VLCT}cache
-${VLCT}temp
+${VLCT}temporaries
 ${VLCT}swap
 echo "build subvolumes..."
 done_msg
@@ -108,32 +109,34 @@ echo "unmount filesystems..."
 done_msg
 
 echo "mount btrfs subvolumes..."
-OPS="compress=zstd:5,noatime"
-OPS2="nodatacow,noatime"
+OPS="compress=zstd:5"
+OPS2="nodatacow"
+OPS3="compress=zstd:5,noexec,nosuid,nodev"
 MNTO="mount -o subvol"
-${MNTO}root,$OPS $RT /mnt
-mkdir -p /mnt/{home,boot,var/log,var/cache,.swap,var/snapshots,ops/containers,ops/vmachines,var/tmp}
-${MNTO}=variable,${OPS},noexec $RT /mnt/var
-${MNTO}=cache,$OPS $RT /mnt/var/cache
+${MNTO}root,$OPS $ROOT /mnt
+mkdir -p /mnt/{home,boot,ops/containers,ops/vmachines,var}
+${MNTO}=variable,$OPS3 $ROOT /mnt/var
+mkdir -p /mnt/{var/log,var/cache,var/.swap,var/.snapshots,var/tmp}
+${MNTO}=cache,$OPS3 $ROOT /mnt/var/cache
 mkdir -p /mnt/var/cache/pacman/pkg
-${MNTO}=logs,$OPS $RT /mnt/var/log
-${MNTO}=users,$OPS $RT /mnt/home
-${MNTO}=packages,$OPS $RT /mnt/var/cache/pacman/pkg
-${MNTO}=temporary,$OPS $RT /mnt/var/tmp
-${MNTO}=snapshots,$OPS $RT /mnt/var/snapshots
-${MNTO}=containers,$OPS2 $RT /mnt/ops/containers
-${MNTO}=virtualmachines,$OPS2 $RT /mnt/ops/vmachines
-${MNTO}=swap,$OPS2 $RT /mnt/.swap
+${MNTO}=logs,$OPS3 $ROOT /mnt/var/log
+${MNTO}=users,$OPS,nosuid,nodev $ROOT /mnt/home
+${MNTO}=packages,$OPS3 $ROOT /mnt/var/cache/pacman/pkg
+${MNTO}=temporaries,$OPS3 $ROOT /mnt/var/tmp
+${MNTO}=snapshots,$OPS3 $ROOT /mnt/var/.snapshots
+${MNTO}=containers,$OPS2 $ROOT /mnt/ops/containers
+${MNTO}=virtualmachines,$OPS2 $ROOT /mnt/ops/vmachines
+${MNTO}=swap,$OPS2 $ROOT /mnt/var/.swap
 echo "mount btrfs subvolumes..."
 done_msg
 
 echo "mount boot..."
-mount $BT /mnt/boot
+mount $BOOT /mnt/boot
 echo "mount boot..."
 done_msg
 
 echo
-echo "intended output: 2 partitions and 10 subvolumes"
+echo "intended output: 2 partitions and 11 subvolumes"
 findmnt -R /mnt
 read -p "enter to continue to package install > "
 
