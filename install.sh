@@ -81,7 +81,7 @@ read -p "root(btrfs) > $DRV" ROOTPT
 BOOT="$DRV$BOOTPT"
 ROOT="$DRV$ROOTPT"
 echo "formating ${BOOT} as boot & ${ROOT} as root..."
-mkfs.vfat -F32 -n "boot" $BOOT
+mkfs.vfat -F32 -n "ESP" $BOOT
 mkfs.btrfs -L artix -f -M -O quota $ROOT
 echo "formating ${BOOT} as boot & ${ROOT} as root..."
 done_msg
@@ -109,30 +109,31 @@ echo "unmount filesystems..."
 done_msg
 
 echo "mount btrfs subvolumes..."
-OPS="compress=zstd:5"
-OPS2="nodatacow"
-OPS3="compress=zstd:5,noexec,nosuid,nodev"
+OPS="compress=zstd:8"
+OPS2="nosuid,nodev"
+LOCKED="noexec,nosuid,nodev"
 MNTO="mount -o subvol"
 ${MNTO}root,$OPS $ROOT /mnt
-mkdir -p /mnt/{home,boot,ops/containers,ops/vmachines,var}
-${MNTO}=variable,$OPS3 $ROOT /mnt/var
+mkdir -p /mnt/{home,boot/efi,ops/containers,ops/vmachines,var}
+${MNTO}=boot,$LOCKED $ROOT /mnt/boot
+${MNTO}=variable,$OPS2 $ROOT /mnt/var
 mkdir -p /mnt/{var/log,var/cache,var/.swap,var/.snapshots,var/tmp}
-${MNTO}=cache,$OPS3 $ROOT /mnt/var/cache
+${MNTO}=cache,$OPS2 $ROOT /mnt/var/cache
 mkdir -p /mnt/var/cache/pacman/pkg
-${MNTO}=logs,$OPS3 $ROOT /mnt/var/log
-${MNTO}=users,$OPS,nosuid,nodev $ROOT /mnt/home
-${MNTO}=packages,$OPS3 $ROOT /mnt/var/cache/pacman/pkg
-${MNTO}=temporaries,$OPS3 $ROOT /mnt/var/tmp
-${MNTO}=snapshots,$OPS3 $ROOT /mnt/var/.snapshots
-${MNTO}=containers,$OPS2 $ROOT /mnt/ops/containers
-${MNTO}=virtualmachines,$OPS2 $ROOT /mnt/ops/vmachines
-${MNTO}=swap,$OPS2 $ROOT /mnt/var/.swap
+${MNTO}=logs,$LOCKED $ROOT /mnt/var/log
+${MNTO}=users,$OPS2 $ROOT /mnt/home
+${MNTO}=packages,$OPS2 $ROOT /mnt/var/cache/pacman/pkg
+${MNTO}=temporaries,$OPS2 $ROOT /mnt/var/tmp
+${MNTO}=snapshots,$LOCKED $ROOT /mnt/var/.snapshots
+${MNTO}=containers $ROOT /mnt/ops/containers
+${MNTO}=virtualmachines $ROOT /mnt/ops/vmachines
+${MNTO}=swap,$LOCKED $ROOT /mnt/var/.swap
 echo "mount btrfs subvolumes..."
 done_msg
 
-echo "mount boot..."
-mount $BOOT /mnt/boot
-echo "mount boot..."
+echo "mount esp..."
+mount -t vfat -o noexec,nosuid,nodev $ESP /mnt/boot/efi
+echo "mount esp..."
 done_msg
 
 echo
@@ -214,6 +215,9 @@ echo "networking..."
 $CHRT ln -s /etc/dinit.d/dhcpcd /etc/dinit.d/boot.d/
 echo "networking..."
 done_msg
+
+echo "filesystem settings..."
+$CHRT chattr -R +C /opt/{vmachines,containers} /var/.swap
 
 echo -e "\e[1;5;32m[installation completed]\e[0m"
 echo "unmounting filesystems"
