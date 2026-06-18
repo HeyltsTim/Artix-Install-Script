@@ -109,21 +109,21 @@ echo "unmount filesystems..."
 done_msg
 
 echo "mount btrfs subvolumes..."
-OPS="compress=zstd:8"
-OPS2="nosuid,nodev"
+OPT="compress=zstd:8"
+SAFE="nosuid,nodev"
 LOCKED="noexec,nosuid,nodev"
 MNTO="mount -o subvol"
-${MNTO}root,$OPS $ROOT /mnt
+${MNTO}root,$OPT $ROOT /mnt
 mkdir -p /mnt/{home,boot/efi,ops/containers,ops/vmachines,var}
 ${MNTO}=boot,$LOCKED $ROOT /mnt/boot
-${MNTO}=variable,$OPS2 $ROOT /mnt/var
+${MNTO}=variable,$SAFE $ROOT /mnt/var
 mkdir -p /mnt/{var/log,var/cache,var/.swap,var/.snapshots,var/tmp}
-${MNTO}=cache,$OPS2 $ROOT /mnt/var/cache
+${MNTO}=cache,$SAFE $ROOT /mnt/var/cache
 mkdir -p /mnt/var/cache/pacman/pkg
 ${MNTO}=logs,$LOCKED $ROOT /mnt/var/log
-${MNTO}=users,$OPS2 $ROOT /mnt/home
-${MNTO}=packages,$OPS2 $ROOT /mnt/var/cache/pacman/pkg
-${MNTO}=temporaries,$OPS2 $ROOT /mnt/var/tmp
+${MNTO}=users,$SAFE $ROOT /mnt/home
+${MNTO}=packages,$SAFE $ROOT /mnt/var/cache/pacman/pkg
+${MNTO}=temporaries,$SAFE $ROOT /mnt/var/tmp
 ${MNTO}=snapshots,$LOCKED $ROOT /mnt/var/.snapshots
 ${MNTO}=containers $ROOT /mnt/ops/containers
 ${MNTO}=virtualmachines $ROOT /mnt/ops/vmachines
@@ -132,7 +132,7 @@ echo "mount btrfs subvolumes..."
 done_msg
 
 echo "mount esp..."
-mount -t vfat -o noexec,nosuid,nodev $ESP /mnt/boot/efi
+mount -t vfat -o $LOCKED $ESP /mnt/boot/efi
 echo "mount esp..."
 done_msg
 
@@ -142,10 +142,10 @@ findmnt -R /mnt
 read -p "enter to continue to package install > "
 
 echo "package install..."
-basestrap -Ki /mnt base sudo nano linux-rt seatd-dinit mkinitcpio \
+basestrap -Ki /mnt base sudo vim linux-rt mkinitcpio \
 amd-ucode linux-firmware-mediatek linux-firmware-amdgpu \
 linux-firmware-realtek turnstile-dinit bash-completion \
-dhcpcd-dinit btrfs-progs grub-btrfs efibootmgr dosfstools dbus-dinit dbus-dinit-user
+dhcpcd-dinit btrfs-progs grub-btrfs efibootmgr dosfstools acpid-dinit dbus-dinit dbus-dinit-user
 echo "package install..."
 done_msg
 
@@ -218,6 +218,7 @@ done_msg
 
 echo "filesystem settings..."
 $CHRT chattr -R +C /opt/{vmachines,containers} /var/.swap
+$CHRT chmod 700 /var/cache/pacman /var/.snapshots /var/.swap
 
 echo -e "\e[1;5;32m[installation completed]\e[0m"
 echo "unmounting filesystems"
