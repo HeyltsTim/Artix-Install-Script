@@ -90,15 +90,16 @@ echo "build subvolumes..."
 mount $ROOT /mnt
 VLCT="btrfs subvolume create /mnt/"
 ${VLCT}root
+${VLCT}boot
 ${VLCT}users
 ${VLCT}containers
 ${VLCT}virtualmachines
-${VLCT}variables
+${VLCT}variable
 ${VLCT}packages
 ${VLCT}snapshots
 ${VLCT}logs
 ${VLCT}cache
-${VLCT}temporaries
+${VLCT}temporary
 ${VLCT}swap
 echo "build subvolumes..."
 done_msg
@@ -114,7 +115,7 @@ SAFE="nosuid,nodev"
 LOCKED="noexec,nosuid,nodev"
 MNTO="mount -o subvol"
 ${MNTO}root,$OPT $ROOT /mnt
-mkdir -p /mnt/{home,boot/efi,ops/containers,ops/vmachines,var}
+mkdir -p /mnt/{home,boot/efi,opt/containers,opt/vmachines,var}
 ${MNTO}=boot,$LOCKED $ROOT /mnt/boot
 ${MNTO}=variable,$SAFE $ROOT /mnt/var
 mkdir -p /mnt/{var/log,var/cache,var/.swap,var/.snapshots,var/tmp}
@@ -123,10 +124,10 @@ mkdir -p /mnt/var/cache/pacman/pkg
 ${MNTO}=logs,$LOCKED $ROOT /mnt/var/log
 ${MNTO}=users,$SAFE $ROOT /mnt/home
 ${MNTO}=packages,$SAFE $ROOT /mnt/var/cache/pacman/pkg
-${MNTO}=temporaries,$SAFE $ROOT /mnt/var/tmp
+${MNTO}=temporary,$SAFE $ROOT /mnt/var/tmp
 ${MNTO}=snapshots,$LOCKED $ROOT /mnt/var/.snapshots
-${MNTO}=containers $ROOT /mnt/ops/containers
-${MNTO}=virtualmachines $ROOT /mnt/ops/vmachines
+${MNTO}=containers $ROOT /mnt/opt/containers
+${MNTO}=virtualmachines $ROOT /mnt/opt/vmachines
 ${MNTO}=swap,$LOCKED $ROOT /mnt/var/.swap
 echo "mount btrfs subvolumes..."
 done_msg
@@ -206,7 +207,7 @@ echo "credentials..."
 done_msg
 
 echo "grub..."
-$CHRT grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+$CHRT grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
 $CHRT grub-mkconfig -o /boot/grub/grub.cfg
 echo "grub..."
 done_msg
@@ -216,10 +217,14 @@ $CHRT ln -s /etc/dinit.d/dhcpcd /etc/dinit.d/boot.d/
 echo "networking..."
 done_msg
 
+echo "swapfile..."
+$CHRT fallocate -l 2G /var/.swap/swapfile
+$CHRT mkswap /var/.swap/swapfile
+
 echo "filesystem settings..."
-$CHRT chattr -R +C /opt/{vmachines,containers} /var/.swap
+$CHRT chattr +C /opt/{vmachines,containers} /var/.swap
 $CHRT chmod 700 /var/cache/pacman /var/.snapshots 
-$CHRT chmod 600 /var/.swap
+$CHRT chmod 600 /var/.swap /var/.swap/swapfile
 
 echo -e "\e[1;5;32m[installation completed]\e[0m"
 echo "unmounting filesystems"
