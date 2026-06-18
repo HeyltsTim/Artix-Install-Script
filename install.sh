@@ -218,7 +218,8 @@ done_msg
 
 echo "filesystem settings..."
 $CHRT chattr -R +C /opt/{vmachines,containers} /var/.swap
-$CHRT chmod 700 /var/cache/pacman /var/.snapshots /var/.swap
+$CHRT chmod 700 /var/cache/pacman /var/.snapshots 
+$CHRT chmod 600 /var/.swap
 
 echo -e "\e[1;5;32m[installation completed]\e[0m"
 echo "unmounting filesystems"
