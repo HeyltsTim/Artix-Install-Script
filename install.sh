@@ -154,9 +154,8 @@ findmnt -R /mnt
 read -p "enter to continue to package install > "
 
 echo "package install..."
-basestrap -Ki /mnt  
- 
-   
+mapfile -t packages < <(grep -vE '^\s*#|^\s*$'./packages.conf)
+basestrap -Ki /mnt ${packages[@]}
 done_msg
 
 echo "fstab..."
@@ -176,7 +175,6 @@ CTY="New_York"
 echo "${CTY}"
 ln -sf /mnt/usr/share/zoneinfo/${RGN}/${CTY} /mnt/etc/localtime
 ${CHRT}"hwclock --systohc"
-echo "region and time..."
 done_msg
 
 echo "locale..."
@@ -185,33 +183,27 @@ echo "${LCCODE} UTF-8" > /mnt/etc/locale.gen
 echo "LANG=${LCCODE}" > /mnt/etc/locale.conf
 echo "KEYMAP=us" > /mnt/etc/vconsole.conf
 ${CHRT}"locale-gen"
-echo "locale..."
 done_msg
 
 echo "sudo..."
 sed -i "s/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/" /mnt/etc/sudoers
 ${CHRT}"EDITOR=vim visudo -c"
-echo "sudo..."
 done_msg
 
 echo "hostname..."
 read -p "hostname > " HN
 echo "${HN}" > /mnt/etc/hostname
-echo "hostname..."
 done_msg
 
 echo "credentials..."
-
 echo "add administrative user"
 read -p "username > " USRNM
 ${CHRT}"useradd --btrfs-subvolume-home -m -g users -G wheel ${USRNM}"
 ${CHRT}"passwd ${USRNM}"
 echo "disabling root user (use sudo)..."
 ${CHRT}"sudo passwd -l root"
-${CHRT}"usermod -s /sbin/nologin root"
-${CHRT}"usermod -d / root"
-rm -rf /mnt/root
-echo "credentials..."
+${CHRT}"sed -i 's|^root:x:0:0:root:/root:/bin/bash|root:x:0:0:root:/:/sbin/nologin|' /etc/passwd
+rm -rf /mnt/root"
 done_msg
 
 echo "grub..."
