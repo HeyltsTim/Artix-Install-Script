@@ -121,7 +121,7 @@ SAFE="nosuid,nodev"
 LOCKED="noexec,nosuid,nodev"
 MNTO="mount -o subvol"
 
-${MNTO}"=root,${OPT} ${ROOT} /mnt"
+${MNTO}=root,${OPT} ${ROOT} /mnt
 
 mkdir -p /mnt/{boot,home,var,srv,opt/containers,opt/vmachines}
 ${MNTO}=boot,${LOCKED} ${ROOT} /mnt/boot
