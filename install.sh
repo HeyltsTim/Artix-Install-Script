@@ -154,7 +154,7 @@ findmnt -R /mnt
 read -p "enter to continue to package install > "
 
 echo "package install..."
-mapfile -t packages < <(grep -vE '^\s*#|^\s*$'./packages.conf)
+mapfile -t packages < <(grep -vE '^\s*#|^\s*$' ./packages.conf)
 basestrap -Ki /mnt ${packages[@]}
 done_msg
 
