@@ -66,7 +66,7 @@ done_msg
 }
 
 #start of script
-echo "if you are not please run as root.\nyou are $USER"
+echo -e "if you are not please run as root.\nyou are $USER"
 lsblk -dn
 
 echo "what is the name of your drive? ex: sd<a-z> or nvme#n# etc. and not sda# or nvme#n#p#"
