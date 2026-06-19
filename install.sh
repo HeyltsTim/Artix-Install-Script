@@ -69,6 +69,7 @@ done_msg
 
 #start of script
 clear
+umount -R /mnt
 echo
 echo -e "please run as root.\nyou are $USER\n"
 
@@ -197,7 +198,7 @@ echo "credentials..."
 
 echo "add administrative user"
 read -p "username > " USRNM
-$CHRT useradd --btrfs-subvolume-home -m -g users -G wheel ${USRNM}
+$CHRT useradd --btrfs-subvolume-home -g users -G wheel ${USRNM}
 $CHRT passwd $USRNM
 echo "disabling root user (use sudo)..."
 $CHRT sudo passwd -l root
