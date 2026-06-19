@@ -70,13 +70,12 @@ done_msg
 #start of script
 clear
 umount -R /mnt
-echo
-echo -e "please run as root.\nyou are $USER\n"
+echo -e "\nplease run as root.\nyou are $USER\n"
 
 lsblk -dn
-
+echo
 echo "what is the name of your drive? ex: sd<a-z> or nvme#n# etc. and not sda# or nvme#n#p#"
-read -p "name of device you would like to use | " DRIVENAME
+read -p "name of device you would like to use > " DRIVENAME
 echo "using $DRIVENAME"
 DRIVEPATH="/dev/$DRIVENAME"
 
@@ -199,7 +198,7 @@ echo "credentials..."
 
 echo "add administrative user"
 read -p "username > " USRNM
-$CHRT 'useradd --btrfs-subvolume-home -g users -G wheel ${USRNM}'
+$CHRT 'useradd --btrfs-subvolume-home -m -g users -G wheel ${USRNM}'
 $CHRT 'passwd $USRNM'
 echo "disabling root user (use sudo)..."
 $CHRT 'sudo passwd -l root'
@@ -221,13 +220,14 @@ echo "networking..."
 done_msg
 
 echo "swapfile..."
-$CHRT 'fallocate -l 2G /var/.swap/swapfile'
+read -p "swap size in gigabytes > " SWAP 
+$CHRT 'fallocate -l ${SWAP}G /var/.swap/swapfile'
 $CHRT 'mkswap /var/.swap/swapfile'
 done_msg
 
 echo "filesystem settings..."
 $CHRT 'chattr +C /opt/{vmachines,containers} /var/.swap'
-$CHRT 'chmod 700 /var/cache/pacman /var/.snapshots'
+$CHRT 'chmod 700 /var/cache/pacman /var/.snapshots /boot'
 $CHRT 'chmod 600 /var/.swap /var/.swap/swapfile'
 done_msg
 
