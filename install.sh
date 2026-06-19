@@ -69,7 +69,7 @@ done_msg
 
 #start of script
 clear
-umount -R /mnt
+umount -lR /mnt 2>/dev/null || true
 echo -e "\nplease run as root.\nyou are ${USER}\n"
 
 lsblk -dn
