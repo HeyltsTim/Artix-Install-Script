@@ -1,7 +1,7 @@
 #!/bin/bash
 
 countdown_() {
-for i in {5..0}; do
+for i in {9..0}; do
 echo -ne "\r${i}"
 sleep 1
 done
@@ -241,8 +241,10 @@ done_msg
 
 echo -e "\e[1;5;32m[installation completed]\e[0m"
 echo "unmounting filesystems"
-flush_dv ${DRIVENAME}
-umount -R /mnt
+echo "waiting for processes to end gracefully"
+countdown_
+fuser -k /mnt
+umount -Rl /mnt
 echo "unmounting filesystems"
 done_msg
 
