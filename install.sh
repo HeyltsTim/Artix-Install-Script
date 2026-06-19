@@ -231,6 +231,7 @@ done_msg
 echo "system settings..."
 mkdir -p /mnt/opt/install
 cp -r ./root/* /mnt/
+${CHRT}"chmod +x /opt/install/post-install.sh"
 
 echo -e "\e[1;5;32m[installation completed]\e[0m"
 echo "unmount filesystems..."
