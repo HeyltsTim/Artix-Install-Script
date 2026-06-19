@@ -35,7 +35,6 @@ if [ -b "${PART}" ]; then
 flush_pt ${PART}
 fi
 done
-echo "flushing..."
 done_msg
 }
 
@@ -48,7 +47,6 @@ echo "wiping drive..."
 countdown_
 flush_dv ${1}
 wipefs -fa "/dev/${1}"
-echo "wiping drive..."
 done_msg
 }
 
@@ -201,7 +199,7 @@ read -p "username > " USRNM
 ${CHRT}"useradd --btrfs-subvolume-home -m -g users -G wheel ${USRNM}"
 ${CHRT}"passwd ${USRNM}"
 echo "disabling root user (use sudo)..."
-${CHRT}"sudo passwd -l root"
+${CHRT}"passwd -l root"
 ${CHRT}"sed -i 's|^root:x:0:0:root:/root:/bin/bash|root:x:0:0:root:/:/sbin/nologin|' /etc/passwd
 rm -rf /mnt/root"
 done_msg
@@ -209,12 +207,10 @@ done_msg
 echo "grub..."
 ${CHRT}"grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB"
 ${CHRT}"grub-mkconfig -o /boot/grub/grub.cfg"
-echo "grub..."
 done_msg
 
 echo "networking..."
 ${CHRT}"ln -s /etc/dinit.d/dhcpcd /etc/dinit.d/boot.d/"
-echo "networking..."
 done_msg
 
 echo "swapfile..."
