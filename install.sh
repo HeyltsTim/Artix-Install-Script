@@ -154,11 +154,9 @@ findmnt -R /mnt
 read -p "enter to continue to package install > "
 
 echo "package install..."
-basestrap -Ki /mnt base sudo vim linux-rt mkinitcpio \
-amd-ucode linux-firmware-mediatek linux-firmware-amdgpu \
-linux-firmware-realtek turnstile-dinit bash-completion \
-dhcpcd-dinit btrfs-progs grub-btrfs efibootmgr dosfstools \
-seatd-dinit acpid-dinit dbus-dinit dbus-dinit-user iptables
+basestrap -Ki /mnt  
+ 
+   
 done_msg
 
 echo "fstab..."
