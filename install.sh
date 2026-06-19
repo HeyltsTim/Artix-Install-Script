@@ -62,6 +62,8 @@ type=0FC63DAF-8483-4772-8E79-3D69D8477DE4
 EOF
 echo "partitioning ${1}..."
 flush_dv ${1}
+
+echo -e "\nwaiting for kernel partition table to update..."
 sleep 15
 done_msg
 }
@@ -74,16 +76,18 @@ echo -e "please run as root.\nyou are $USER\n"
 lsblk -dn
 
 echo "what is the name of your drive? ex: sd<a-z> or nvme#n# etc. and not sda# or nvme#n#p#"
-read -p "name of device you would like to use | " DRV
-echo "using $DRV"
-partition_drv $DRV
+read -p "name of device you would like to use | " DRVNAME
+echo "using $DRIVENAME"
+DRIVEPATH="/dev/$DRIVENAME"
 
-lsblk -ln $DRV
+partition_drv $DRIVENAME
+
+lsblk -ln $DRIVEPATH
 echo "partition number ex: sda# or nvme0n1p#"
-read -p "boot(fat32) > $DRV" BOOTPT
-read -p "root(btrfs) > $DRV" ROOTPT
-BOOT="$DRV$BOOTPT"
-ROOT="$DRV$ROOTPT"
+read -p "boot(fat32) > $DRIVENAME" BOOTPTNUM
+read -p "root(btrfs) > $DRIVENAME" ROOTPTNUM
+BOOT="$DRIVEPATH$BOOTPTNUM"
+ROOT="$DRIVEPATH$ROOTPTNUM"
 echo "formating ${BOOT} as boot & ${ROOT} as root..."
 mkfs.vfat -F32 -n "ESP" $BOOT
 mkfs.btrfs -L artix -f -M -O quota $ROOT
