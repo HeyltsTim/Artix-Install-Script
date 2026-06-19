@@ -2,7 +2,7 @@
 
 countdown_() {
 for i in {5..0}; do
-echo -ne "\r$i"
+echo -ne "\r${i}"
 sleep 1
 done
 echo -ne "\r"
@@ -11,28 +11,28 @@ echo -ne "\r"
 done_msg() {
 COLOR="\e[32m"
 BOLD="\e[1m"
-BLINK="\e[5m"
+#BLINK="\e[5m"
 RESET="\e[0m"
-echo -e "${BOLD}${BLINK}${COLOR}[done]${RESET}\n"
+echo -e "${BOLD}${COLOR}[done]${RESET}\n"
 }
 
 flush_pt() {
-fuser -k "/dev/$1" 2>/dev/null || true
-partprobe "/dev/$1" 2>/dev/null || true
+fuser -k "/dev/${1}" 2>/dev/null || true
+partprobe "/dev/${1}" 2>/dev/null || true
 sync
-blockdev --flushbufs "/dev/$1" 2>/dev/null || true
+blockdev --flushbufs "/dev/${1}" 2>/dev/null || true
 }
 
 flush_dv() {
 echo "flushing ${1}..."
 for PART in "${1}"p[0-9]*; do
-if [ -b "$PART" ]; then
-flush_pt $PART
+if [ -b "${PART}" ]; then
+flush_pt ${PART}
 fi
 done
 for PART in "${1}"[0-9]*; do
-if [ -b "$PART" ]; then
-flush_pt $PART
+if [ -b "${PART}" ]; then
+flush_pt ${PART}
 fi
 done
 echo "flushing..."
@@ -41,13 +41,13 @@ done_msg
 
 wipe_fs() {
 clear
-echo "!WARNING! this action will wipe all data on drive $1"
+echo "!WARNING! this action will wipe all data on drive ${1}"
 read -p "enter to continue ctrl+c to cancel"
 clear
 echo "wiping drive..."
 countdown_
-flush_dv $1
-wipefs -fa "/dev/$1"
+flush_dv ${1}
+wipefs -fa "/dev/${1}"
 echo "wiping drive..."
 done_msg
 }
@@ -70,31 +70,31 @@ done_msg
 #start of script
 clear
 umount -R /mnt
-echo -e "\nplease run as root.\nyou are $USER\n"
+echo -e "\nplease run as root.\nyou are ${USER}\n"
 
 lsblk -dn
 echo
 echo "what is the name of your drive? ex: sd<a-z> or nvme#n# etc. and not sda# or nvme#n#p#"
 read -p "name of device you would like to use > " DRIVENAME
-echo "using $DRIVENAME"
-DRIVEPATH="/dev/$DRIVENAME"
+echo "using ${DRIVENAME}"
+DRIVEPATH="/dev/${DRIVENAME}"
 
-partition_drv $DRIVENAME
+partition_drv ${DRIVENAME}
 
-lsblk -ln $DRIVEPATH
+lsblk -ln ${DRIVEPATH}
 echo "partition number ex: sda# or nvme0n1p#"
-read -p "boot(fat32) > $DRIVENAME" ESPPTNUM
-read -p "root(btrfs) > $DRIVENAME" ROOTPTNUM
-ESP="$DRIVEPATH$ESPPTNUM"
-ROOT="$DRIVEPATH$ROOTPTNUM"
+read -p "boot(fat32) > ${DRIVENAME}" ESPPTNUM
+read -p "root(btrfs) > ${DRIVENAME}" ROOTPTNUM
+ESP="${DRIVEPATH}${ESPPTNUM}"
+ROOT="${DRIVEPATH}${ROOTPTNUM}"
 
 echo -e "\nformating ${ESP} as boot & ${ROOT} as root..."
-mkfs.vfat -F32 -n "ESP" $ESP
-mkfs.btrfs -L artix -f -M -O quota $ROOT
+mkfs.vfat -F32 -n "ESP" ${ESP}
+mkfs.btrfs -L artix -f -M -O quota ${ROOT}
 done_msg
 
 echo "build subvolumes..."
-mount $ROOT /mnt
+mount ${ROOT} /mnt
 VLCT="btrfs subvolume create /mnt/"
 ${VLCT}root
 ${VLCT}boot
@@ -108,6 +108,7 @@ ${VLCT}logs
 ${VLCT}cache
 ${VLCT}temporary
 ${VLCT}swap
+${VLCT}services
 done_msg
 
 echo "unmount filesystems..."
@@ -119,24 +120,31 @@ OPT="compress=zstd:8"
 SAFE="nosuid,nodev"
 LOCKED="noexec,nosuid,nodev"
 MNTO="mount -o subvol"
-${MNTO}=root,$OPT $ROOT /mnt
-mkdir -p /mnt/{home,boot,opt/containers,opt/vmachines,var}
-${MNTO}=boot,$LOCKED $ROOT /mnt/boot
-${MNTO}=variable,$SAFE $ROOT /mnt/var
-mkdir -p /mnt/{boot/efi,var/log,var/cache,var/.swap,var/.snapshots,var/tmp}
-${MNTO}=cache,$SAFE $ROOT /mnt/var/cache
+
+${MNTO}"=root,${OPT} ${ROOT} /mnt"
+
+mkdir -p /mnt/{boot,home,var,srv,opt/containers,opt/vmachines}
+${MNTO}"=boot,${LOCKED} ${ROOT} /mnt/boot"
+${MNTO}"=users,${SAFE} ${ROOT} /mnt/home"
+${MNTO}"=variable,${SAFE} ${ROOT} /mnt/var"
+${MNTO}"=services,${SAFE} ${ROOT} /mnt/srv"
+${MNTO}"=containers ${ROOT} /mnt/opt/containers"
+${MNTO}"=virtualmachines ${ROOT} /mnt/opt/vmachines"
+
+mkdir -p /mnt/{var/log,var/tmp,var/cache,var/.snapshots,var/.swap}
+${MNTO}"=logs,${LOCKED} ${ROOT} /mnt/var/log"
+${MNTO}"=temporary,${SAFE} ${ROOT} /mnt/var/tmp"
+${MNTO}"=cache,${SAFE} ${ROOT} /mnt/var/cache"
+${MNTO}"=snapshots,${LOCKED} ${ROOT} /mnt/var/.snapshots"
+${MNTO}"=swap,${LOCKED} ${ROOT} /mnt/var/.swap"
+
 mkdir -p /mnt/var/cache/pacman/pkg
-${MNTO}=logs,$LOCKED $ROOT /mnt/var/log
-${MNTO}=users,$SAFE $ROOT /mnt/home
-${MNTO}=packages,$SAFE $ROOT /mnt/var/cache/pacman/pkg
-${MNTO}=temporary,$SAFE $ROOT /mnt/var/tmp
-${MNTO}=snapshots,$LOCKED $ROOT /mnt/var/.snapshots
-${MNTO}=containers $ROOT /mnt/opt/containers
-${MNTO}=virtualmachines $ROOT /mnt/opt/vmachines
-${MNTO}=swap,$LOCKED $ROOT /mnt/var/.swap
+${MNTO}"=packages,${SAFE} ${ROOT} /mnt/var/cache/pacman/pkg"
+
 done_msg
 
 echo "mount esp..."
+mkdir /mnt/boot/efi
 mount -t vfat -o $LOCKED $ESP /mnt/boot/efi
 done_msg
 
@@ -157,40 +165,40 @@ echo "fstab..."
 fstabgen -U /mnt >> /mnt/etc/fstab
 done_msg
 
-CHRT="artix-chroot /mnt /bin/bash -c"
+CHRT="artix-chroot /mnt /bin/bash -c "
 
 echo "region and time..."
 echo "region"
 RGN="America"
 #read -p "ex: America > " RGN
-echo "$RGN"
+echo "${RGN}"
 echo "city"
 CTY="New_York"
 #read -p "ex: New_York >  " CTY
-echo "$CTY"
-ln -sf /mnt/usr/share/zoneinfo/$RGN/$CTY /mnt/etc/localtime
-$CHRT "hwclock --systohc"
+echo "${CTY}"
+ln -sf /mnt/usr/share/zoneinfo/${RGN}/${CTY} /mnt/etc/localtime
+${CHRT}"hwclock --systohc"
 echo "region and time..."
 done_msg
 
 echo "locale..."
 LCCODE="en_US.UTF-8"
-echo "$LCCODE UTF-8" > /mnt/etc/locale.gen
-echo "LANG=$LCCODE" > /mnt/etc/locale.conf
+echo "${LCCODE} UTF-8" > /mnt/etc/locale.gen
+echo "LANG=${LCCODE}" > /mnt/etc/locale.conf
 echo "KEYMAP=us" > /mnt/etc/vconsole.conf
-$CHRT locale-gen
+${CHRT}"locale-gen"
 echo "locale..."
 done_msg
 
 echo "sudo..."
 sed -i "s/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/" /mnt/etc/sudoers
-$CHRT "EDITOR=vim visudo -c"
+${CHRT}"EDITOR=vim visudo -c"
 echo "sudo..."
 done_msg
 
 echo "hostname..."
 read -p "hostname > " HN
-echo "$HN" > /mnt/etc/hostname
+echo "${HN}" > /mnt/etc/hostname
 echo "hostname..."
 done_msg
 
@@ -198,54 +206,57 @@ echo "credentials..."
 
 echo "add administrative user"
 read -p "username > " USRNM
-$CHRT "useradd --btrfs-subvolume-home -m -g users -G wheel ${USRNM}"
-$CHRT "passwd $USRNM"
+${CHRT}"useradd --btrfs-subvolume-home -m -g users -G wheel ${USRNM}"
+${CHRT}"passwd ${USRNM}"
 echo "disabling root user (use sudo)..."
-$CHRT "sudo passwd -l root"
-$CHRT "usermod -s /sbin/nologin root"
-$CHRT "usermod -d / root"
+${CHRT}"sudo passwd -l root"
+${CHRT}"usermod -s /sbin/nologin root"
+${CHRT}"usermod -d / root"
 rm -rf /mnt/root
 echo "credentials..."
 done_msg
 
 echo "grub..."
-$CHRT "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB"
-$CHRT "grub-mkconfig -o /boot/grub/grub.cfg"
+${CHRT}"grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB"
+${CHRT}"grub-mkconfig -o /boot/grub/grub.cfg"
 echo "grub..."
 done_msg
 
 echo "networking..."
-$CHRT "ln -s /etc/dinit.d/dhcpcd /etc/dinit.d/boot.d/"
+${CHRT}"ln -s /etc/dinit.d/dhcpcd /etc/dinit.d/boot.d/"
 echo "networking..."
 done_msg
 
 echo "swapfile..."
 read -p "swap size in gigabytes > " SWAP 
-$CHRT "fallocate -l ${SWAP}G /var/.swap/swapfile"
-$CHRT "mkswap /var/.swap/swapfile"
+${CHRT}"fallocate -l ${SWAP}G /var/.swap/swapfile"
+${CHRT}"chmod 600 /var/.swap /var/.swap/swapfile"
+${CHRT}"mkswap /var/.swap/swapfile"
 done_msg
 
 echo "filesystem settings..."
-$CHRT "chattr +C /opt/{vmachines,containers} /var/.swap"
-$CHRT "chmod 700 /var/cache/pacman /var/.snapshots /boot"
-$CHRT "chmod 600 /var/.swap /var/.swap/swapfile"
+${CHRT}"chattr +C /opt/{vmachines,containers} /var/.swap"
+${CHRT}"chmod 700 /var/cache/pacman /var/.snapshots /boot"
 done_msg
 
 echo -e "\e[1;5;32m[installation completed]\e[0m"
 echo "unmounting filesystems"
+flush_dv ${DRIVENAME}
 umount -R /mnt
 echo "unmounting filesystems"
 done_msg
 
 while true; do
   read -rp "type \"YES\" to reboot > " RBTYN
-  case "$RBTYN" in
+  case "${RBTYN}" in
     [Yy][Ee][Ss]) exit 1 ;;
     "") echo "ctrl+c to exit"; return 0 ;;
     *) echo "ctrl+c to exit"; return 0 ;;
   esac
 done
 
-read -p "are you sure you would like to reboot? > "
+read -p "are you sure? > "
+clear
+echo "rebooting in..."
 countdown_
 reboot
