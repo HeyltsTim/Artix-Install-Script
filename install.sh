@@ -240,7 +240,7 @@ done_msg
 while true; do
   read -rp "type \"YES\" to reboot > " RBTYN
   case "$RBTYN" in
-    [Yy][Ee][Ss]) return 1 ;;
+    [Yy][Ee][Ss]) exit 1 ;;
     "") echo "ctrl+c to exit"; return 0 ;;
     *) echo "ctrl+c to exit"; return 0 ;;
   esac
