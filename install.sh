@@ -149,7 +149,7 @@ mount -t vfat -o $LOCKED $ESP /mnt/boot/efi
 done_msg
 
 echo
-echo "intended output: 2 partitions and 11 subvolumes"
+echo "intended output: 2 partitions and 13 subvolumes"
 findmnt -R /mnt
 read -p "enter to continue to package install > "
 
