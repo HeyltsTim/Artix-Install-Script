@@ -233,7 +233,7 @@ echo -e "\e[1;5;32m[installation completed]\e[0m"
 echo "unmount filesystems..."
 echo "waiting for processes to end gracefully..."
 countdown_
-fuser -k /mnt
+fuser -k /mnt 2>/dev/null || true
 umount -Rl /mnt
 done_msg
 
