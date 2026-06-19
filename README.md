@@ -1,1 +1,1 @@
-**For AI related things go to AI.md**
+*For AI related things go to AI.md*
