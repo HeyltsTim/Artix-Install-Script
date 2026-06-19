@@ -42,7 +42,7 @@ done_msg
 wipe_fs() {
 clear
 echo "!WARNING! this action will wipe all data on drive $1"
-read -p "enter to continue ctrl+c to cancel | "
+read -p "enter to continue ctrl+c to cancel"
 clear
 echo "wiping drive..."
 countdown_
@@ -119,7 +119,7 @@ OPT="compress=zstd:8"
 SAFE="nosuid,nodev"
 LOCKED="noexec,nosuid,nodev"
 MNTO="mount -o subvol"
-${MNTO}root,$OPT $ROOT /mnt
+${MNTO}=root,$OPT $ROOT /mnt
 mkdir -p /mnt/{home,boot/efi,opt/containers,opt/vmachines,var}
 ${MNTO}=boot,$LOCKED $ROOT /mnt/boot
 ${MNTO}=variable,$SAFE $ROOT /mnt/var
