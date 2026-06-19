@@ -5,5 +5,5 @@
 4. Minimize user configuration at script runtime.
 
 ## Note to Humans
-All code is writen by me. With exception to some simple copy paste snipits from AI provided examples, these are at a maximum 1-3 lines long posibly less.
+All code is writen by me. With exception to some simple copy paste snipits from AI provided examples, these are at a maximum 1-3 lines long probably less than that.
 This document exists because I have AI asist me with any questions, such as: errors, command usage, syntax, and example code. I just got tired of having to explain everything everytime I spun up a new instance.
