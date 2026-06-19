@@ -120,10 +120,10 @@ SAFE="nosuid,nodev"
 LOCKED="noexec,nosuid,nodev"
 MNTO="mount -o subvol"
 ${MNTO}=root,$OPT $ROOT /mnt
-mkdir -p /mnt/{home,boot/efi,opt/containers,opt/vmachines,var}
+mkdir -p /mnt/{home,boot,opt/containers,opt/vmachines,var}
 ${MNTO}=boot,$LOCKED $ROOT /mnt/boot
 ${MNTO}=variable,$SAFE $ROOT /mnt/var
-mkdir -p /mnt/{var/log,var/cache,var/.swap,var/.snapshots,var/tmp}
+mkdir -p /mnt/{boot/efi,var/log,var/cache,var/.swap,var/.snapshots,var/tmp}
 ${MNTO}=cache,$SAFE $ROOT /mnt/var/cache
 mkdir -p /mnt/var/cache/pacman/pkg
 ${MNTO}=logs,$LOCKED $ROOT /mnt/var/log
