@@ -13,7 +13,7 @@ COLOR='\e[32m'
 BOLD='\e[1m'
 BLINK='\e[5m'
 RESET='\e[0m'
-echo -e "${BOLD}${BLINK}${COLOR}[done]${RESET}"
+echo -e "${BOLD}${BLINK}${COLOR}[done]${RESET}\n"
 }
 
 flush_pt() {
@@ -42,13 +42,12 @@ done_msg
 wipe_fs() {
 clear
 echo "!WARNING! this action will wipe all data on drive $1"
-read -p "enter to continue ctrl+c to cancel ~ "
+read -p "enter to continue ctrl+c to cancel | "
 clear
 echo "wiping drive..."
 countdown_
 flush_dv $1
 wipefs -fa "/dev/$1"
-partprobe "/dev/$1"
 echo "wiping drive..."
 done_msg
 }
@@ -62,15 +61,20 @@ type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, size=512MiB
 type=0FC63DAF-8483-4772-8E79-3D69D8477DE4
 EOF
 echo "partitioning ${1}..."
+flush_dv ${1}
+sleep 15
 done_msg
 }
 
 #start of script
-echo -e "if you are not please run as root.\nyou are $USER"
+clear
+echo
+echo -e "please run as root.\nyou are $USER\n"
+
 lsblk -dn
 
 echo "what is the name of your drive? ex: sd<a-z> or nvme#n# etc. and not sda# or nvme#n#p#"
-read -p "name of device you would like to use ~ " DRV
+read -p "name of device you would like to use | " DRV
 echo "using $DRV"
 partition_drv $DRV
 
