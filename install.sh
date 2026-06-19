@@ -169,7 +169,7 @@ CTY="New_York"
 #read -p "ex: New_York >  " CTY
 echo "$CTY"
 ln -sf /mnt/usr/share/zoneinfo/$RGN/$CTY /mnt/etc/localtime
-$CHRT hwclock --systohc
+$CHRT 'hwclock --systohc'
 echo "region and time..."
 done_msg
 
@@ -184,7 +184,7 @@ done_msg
 
 echo "sudo..."
 sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /mnt/etc/sudoers
-$CHRT EDITOR=vim visudo -c
+$CHRT 'EDITOR=vim visudo -c'
 echo "sudo..."
 done_msg
 
@@ -198,35 +198,37 @@ echo "credentials..."
 
 echo "add administrative user"
 read -p "username > " USRNM
-$CHRT useradd --btrfs-subvolume-home -g users -G wheel ${USRNM}
-$CHRT passwd $USRNM
+$CHRT 'useradd --btrfs-subvolume-home -g users -G wheel ${USRNM}'
+$CHRT 'passwd $USRNM'
 echo "disabling root user (use sudo)..."
-$CHRT sudo passwd -l root
-$CHRT usermod -s /sbin/nologin root
-$CHRT usermod -d / root
+$CHRT 'sudo passwd -l root'
+$CHRT 'usermod -s /sbin/nologin root'
+$CHRT 'usermod -d / root'
 rm -rf /mnt/root
 echo "credentials..."
 done_msg
 
 echo "grub..."
-$CHRT grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
-$CHRT grub-mkconfig -o /boot/grub/grub.cfg
+$CHRT 'grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB'
+$CHRT 'grub-mkconfig -o /boot/grub/grub.cfg'
 echo "grub..."
 done_msg
 
 echo "networking..."
-$CHRT ln -s /etc/dinit.d/dhcpcd /etc/dinit.d/boot.d/
+$CHRT 'ln -s /etc/dinit.d/dhcpcd /etc/dinit.d/boot.d/'
 echo "networking..."
 done_msg
 
 echo "swapfile..."
-$CHRT fallocate -l 2G /var/.swap/swapfile
-$CHRT mkswap /var/.swap/swapfile
+$CHRT 'fallocate -l 2G /var/.swap/swapfile'
+$CHRT 'mkswap /var/.swap/swapfile'
+done_msg
 
 echo "filesystem settings..."
-$CHRT chattr +C /opt/{vmachines,containers} /var/.swap
-$CHRT chmod 700 /var/cache/pacman /var/.snapshots 
-$CHRT chmod 600 /var/.swap /var/.swap/swapfile
+$CHRT 'chattr +C /opt/{vmachines,containers} /var/.swap'
+$CHRT 'chmod 700 /var/cache/pacman /var/.snapshots'
+$CHRT 'chmod 600 /var/.swap /var/.swap/swapfile'
+done_msg
 
 echo -e "\e[1;5;32m[installation completed]\e[0m"
 echo "unmounting filesystems"
