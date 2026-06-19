@@ -124,22 +124,22 @@ MNTO="mount -o subvol"
 ${MNTO}"=root,${OPT} ${ROOT} /mnt"
 
 mkdir -p /mnt/{boot,home,var,srv,opt/containers,opt/vmachines}
-${MNTO}"=boot,${LOCKED} ${ROOT} /mnt/boot"
-${MNTO}"=users,${SAFE} ${ROOT} /mnt/home"
-${MNTO}"=variable,${SAFE} ${ROOT} /mnt/var"
-${MNTO}"=services,${SAFE} ${ROOT} /mnt/srv"
-${MNTO}"=containers ${ROOT} /mnt/opt/containers"
-${MNTO}"=virtualmachines ${ROOT} /mnt/opt/vmachines"
+${MNTO}=boot,${LOCKED} ${ROOT} /mnt/boot
+${MNTO}=users,${SAFE} ${ROOT} /mnt/home
+${MNTO}=variable,${SAFE} ${ROOT} /mnt/var
+${MNTO}=services,${SAFE} ${ROOT} /mnt/srv
+${MNTO}=containers ${ROOT} /mnt/opt/containers
+${MNTO}=virtualmachines ${ROOT} /mnt/opt/vmachines
 
 mkdir -p /mnt/{var/log,var/tmp,var/cache,var/.snapshots,var/.swap}
-${MNTO}"=logs,${LOCKED} ${ROOT} /mnt/var/log"
-${MNTO}"=temporary,${SAFE} ${ROOT} /mnt/var/tmp"
-${MNTO}"=cache,${SAFE} ${ROOT} /mnt/var/cache"
-${MNTO}"=snapshots,${LOCKED} ${ROOT} /mnt/var/.snapshots"
-${MNTO}"=swap,${LOCKED} ${ROOT} /mnt/var/.swap"
+${MNTO}=logs,${LOCKED} ${ROOT} /mnt/var/log
+${MNTO}=temporary,${SAFE} ${ROOT} /mnt/var/tmp
+${MNTO}=cache,${SAFE} ${ROOT} /mnt/var/cache
+${MNTO}=snapshots,${LOCKED} ${ROOT} /mnt/var/.snapshots
+${MNTO}=swap,${LOCKED} ${ROOT} /mnt/var/.swap
 
 mkdir -p /mnt/var/cache/pacman/pkg
-${MNTO}"=packages,${SAFE} ${ROOT} /mnt/var/cache/pacman/pkg"
+${MNTO}=packages,${SAFE} ${ROOT} /mnt/var/cache/pacman/pkg
 
 done_msg
 
@@ -230,13 +230,13 @@ done_msg
 echo "swapfile..."
 read -p "swap size in gigabytes > " SWAP 
 ${CHRT}"fallocate -l ${SWAP}G /var/.swap/swapfile"
-${CHRT}"chmod 600 /var/.swap /var/.swap/swapfile"
+${CHRT}"chmod 600 /var/.swap/swapfile"
 ${CHRT}"mkswap /var/.swap/swapfile"
 done_msg
 
 echo "filesystem settings..."
-${CHRT}"chattr +C /opt/{vmachines,containers} /var/.swap"
-${CHRT}"chmod 700 /var/cache/pacman /var/.snapshots /boot"
+${CHRT}"chattr +C /opt/vmachines /opt/containers /var/.swap"
+${CHRT}"chmod 700 /var/.swap /var/cache/pacman /var/.snapshots /boot"
 done_msg
 
 echo -e "\e[1;5;32m[installation completed]\e[0m"
@@ -251,8 +251,8 @@ while true; do
   read -rp "type \"YES\" to reboot > " RBTYN
   case "${RBTYN}" in
     [Yy][Ee][Ss]) exit 1 ;;
-    "") echo "ctrl+c to exit"; return 0 ;;
-    *) echo "ctrl+c to exit"; return 0 ;;
+    "") echo "ctrl+c to exit"; exit 0 ;;
+    *) echo "ctrl+c to exit"; exit 0 ;;
   esac
 done
 
