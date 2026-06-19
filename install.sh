@@ -150,7 +150,8 @@ echo "package install..."
 basestrap -Ki /mnt base sudo vim linux-rt mkinitcpio \
 amd-ucode linux-firmware-mediatek linux-firmware-amdgpu \
 linux-firmware-realtek turnstile-dinit bash-completion \
-dhcpcd-dinit btrfs-progs grub-btrfs efibootmgr dosfstools acpid-dinit dbus-dinit dbus-dinit-user
+dhcpcd-dinit btrfs-progs grub-btrfs efibootmgr dosfstools \
+seatd-dinit acpid-dinit dbus-dinit dbus-dinit-user iptables
 done_msg
 
 echo "fstab..."
