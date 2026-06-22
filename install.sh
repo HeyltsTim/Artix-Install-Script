@@ -155,7 +155,7 @@ echo "package install..."
 mapfile -t packages < <(grep -vE '^\s*#|^\s*$' ./root/etc/packages.conf)
 basestrap -Ki /mnt ${packages[@]}
 mkdir -p /mnt/opt/install
-cp -r ./root/* /mnt/
+cp -r ./root /mnt/
 ${CHRT}"chmod +x /opt/install/post-install.sh"
 done_msg
 
@@ -227,7 +227,7 @@ ${CHRT}"mkswap /var/.swap/swapfile"
 done_msg
 
 echo "filesystem settings..."
-${CHRT}"chattr +C /opt/vmachines /opt/containers /var/.swap"
+${CHRT}"chattr +C /var/lib/lxd/virtual-machines /var/lib/lxd/containers /var/.swap"
 ${CHRT}"chmod 700 /var/.swap /var/cache/pacman /var/.snapshots /boot /etc/fstab"
 ${CHRT}"chown -R alpm:alpm /var/cache/pacman"
 done_msg
