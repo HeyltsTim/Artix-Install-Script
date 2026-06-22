@@ -155,7 +155,7 @@ echo "package install..."
 mapfile -t packages < <(grep -vE '^\s*#|^\s*$' ./root/etc/packages.conf)
 basestrap -Ki /mnt ${packages[@]}
 mkdir -p /mnt/opt/install
-cp -r ./root /mnt/
+cp -r ./root /mnt
 ${CHRT}"chmod +x /opt/install/post-install.sh"
 done_msg
 
