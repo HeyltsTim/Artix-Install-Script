@@ -6,6 +6,14 @@
 5. Ignore Note to Humans. That Isn't for you.
 6. More goals will be added as needed.
 
+# About the Server
+* This server is running artix linux. Explicitly installed packages are located in [/root/etc/packages.conf](https://github.com/HeyltsTim/Artix-Install-Script/blob/main/root/etc/packages.conf), this does not contain any dependencies as those are automatacly detected and installed by pacman.
+* CPU: AMD 9950x3D
+* GPU: Radeon 9070XT
+* Motherboard: Asrock X870E Tiachi Lite
+* RAM 2x64GB 6000 MT/s
+* 8TB SSD
+
 ## Note to Humans
 All code is writen by me. With exception to some simple copy paste snipits from AI provided examples, these are at a maximum 1-3 lines long probably less than that.
 This document exists because I have AI asist me with any questions, such as: errors, command usage, syntax, example code. I just got tired of having to explain everything everytime I spun up a new instance.
