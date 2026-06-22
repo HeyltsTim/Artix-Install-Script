@@ -1,0 +1,2 @@
+type = scripted
+command = /opt/install/post-install.sh

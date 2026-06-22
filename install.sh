@@ -88,7 +88,7 @@ ROOT="${DRIVEPATH}${ROOTPTNUM}"
 
 echo -e "\nformating ${ESP} as boot & ${ROOT} as root..."
 mkfs.vfat -F32 -n "ESP" ${ESP}
-mkfs.btrfs -L artix -f -M -O quota ${ROOT}
+mkfs.btrfs -L artix -f -O quota ${ROOT}
 done_msg
 
 echo "build subvolumes..."
@@ -152,7 +152,7 @@ findmnt -R /mnt
 read -p "enter to continue to package install > "
 
 echo "package install..."
-mapfile -t packages < <(grep -vE '^\s*#|^\s*$' ./packages.conf)
+mapfile -t packages < <(grep -vE '^\s*#|^\s*$' ./root/etc/packages.conf)
 basestrap -Ki /mnt ${packages[@]}
 done_msg
 
@@ -227,6 +227,11 @@ ${CHRT}"chattr +C /opt/vmachines /opt/containers /var/.swap"
 ${CHRT}"chmod 700 /var/.swap /var/cache/pacman /var/.snapshots /boot /etc/fstab"
 ${CHRT}"chown -R alpm:alpm /var/cache/pacman"
 done_msg
+
+echo "system settings..."
+mkdir -p /mnt/opt/install
+cp -r ./root/* /mnt/
+${CHRT}"chmod +x /opt/install/post-install.sh"
 
 echo -e "\e[1;5;32m[installation completed]\e[0m"
 echo "unmount filesystems..."
