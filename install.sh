@@ -121,11 +121,11 @@ MNTO="mount -o subvol"
 
 ${MNTO}=root,${OPT} ${ROOT} /mnt
 
-mkdir -p /mnt/{boot,home,srv}
+mkdir -p /mnt/{boot,home,srv,var}
 ${MNTO}=boot,${LOCKED} ${ROOT} /mnt/boot
 ${MNTO}=users,${SAFE} ${ROOT} /mnt/home
-${MNTO}=variable,${SAFE} ${ROOT} /mnt/var
 ${MNTO}=services,${SAFE} ${ROOT} /mnt/srv
+${MNTO}=variable,${SAFE} ${ROOT} /mnt/var
 
 mkdir -p /mnt/{var/lib/lxd/containers,var/lib/lxd/virtual-machines,var/log,var/tmp,var/cache,var/.snapshots,var/.swap}
 ${MNTO}=containers ${ROOT} /mnt/var/lib/lxd/containers
