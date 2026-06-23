@@ -223,7 +223,8 @@ echo "swapfile..."
 read -p "swap size in gigabytes > " SWAP 
 ${CHRT}"fallocate -l ${SWAP}G /var/.swap/swapfile"
 ${CHRT}"chmod 600 /var/.swap/swapfile"
-${CHRT}"mkswap /var/.swap/swapfile"
+${CHRT}"mkswap /var/.swap/swapfile"\
+echo -e "\n/var/.swap/swapfile none swap defaults 0 0" >> /mnt/etc/fstab
 done_msg
 
 echo "filesystem settings..."
