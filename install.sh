@@ -98,7 +98,7 @@ ${VLCT}root
 ${VLCT}boot
 ${VLCT}users
 ${VLCT}containers
-${VLCT}virtualmachines
+${VLCT}virtual-machines
 ${VLCT}variable
 ${VLCT}packages
 ${VLCT}snapshots
@@ -107,6 +107,7 @@ ${VLCT}cache
 ${VLCT}temporary
 ${VLCT}swap
 ${VLCT}services
+${VLCT}storage-pools
 done_msg
 
 echo "unmount filesystems..."
@@ -127,9 +128,11 @@ ${MNTO}=users,${SAFE} ${ROOT} /mnt/home
 ${MNTO}=services,${SAFE} ${ROOT} /mnt/srv
 ${MNTO}=variable,${SAFE} ${ROOT} /mnt/var
 
-mkdir -p /mnt/{var/lib/lxd/containers,var/lib/lxd/virtual-machines,var/log,var/tmp,var/cache,var/.snapshots,var/.swap}
-${MNTO}=containers ${ROOT} /mnt/var/lib/lxd/containers
-${MNTO}=virtualmachines ${ROOT} /mnt/var/lib/lxd/virtual-machines
+mkdir -p /mnt/var/lib/lxd/{containers,virtual-machines,storage-pools}
+mkdir -p /mnt/{var/log,var/tmp,var/cache,var/.snapshots,var/.swap}
+${MNTO}=containers,${SAFE} ${ROOT} /mnt/var/lib/lxd/containers
+${MNTO}=virtual-machines,${SAFE} ${ROOT} /mnt/var/lib/lxd/virtual-machines
+${MNTO}=storage-pools,${SAFE} ${ROOT} /mnt/var/lib/lxd/storage-pools
 ${MNTO}=logs,${LOCKED} ${ROOT} /mnt/var/log
 ${MNTO}=temporary,${SAFE} ${ROOT} /mnt/var/tmp
 ${MNTO}=cache,${SAFE} ${ROOT} /mnt/var/cache
