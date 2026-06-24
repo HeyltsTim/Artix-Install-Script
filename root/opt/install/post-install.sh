@@ -1,6 +1,6 @@
 #!/bin/bash
 
-btrfs subvolume create /var/lib/lxd/virtual-machines/cachyos
+btrfs subvolume create /var/lib/lxd/storage-pools/cachyos
 
 #init
 SERVICES=("syslog-ng" "lxd" "chrony" "dbus" "acpid" "chrony" "firewalld" "sshd" "turnstiled" "elogind" "lm_sensors" "dnsmasq" "fail2ban" "dhcpcd" "apparmor" "zramen")
