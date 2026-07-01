@@ -81,14 +81,14 @@ partition_drv ${DRIVENAME}
 
 lsblk -ln ${DRIVEPATH}
 echo "partition number ex: sda# or nvme0n1p#"
-read -p "boot(fat32) > ${DRIVENAME}" ESPPTNUM
+read -p "boot(fat32) > ${DRIVENAME}" BOOTPTNUM
 read -p "root(btrfs) > ${DRIVENAME}" ROOTPTNUM
-ESP="${DRIVEPATH}${ESPPTNUM}"
+BOOT="${DRIVEPATH}${BOOTPTNUM}"
 ROOT="${DRIVEPATH}${ROOTPTNUM}"
 
-echo -e "\nformating ${ESP} as boot & ${ROOT} as root..."
-mkfs.vfat -F32 -n "ESP" ${ESP}
-mkfs.btrfs -L artix -f -O quota ${ROOT}
+echo -e "\nformating ${BOOT} as boot & ${ROOT} as root..."
+mkfs.vfat -F32 -n "boot" ${BOOT}
+mkfs.btrfs -L "root" -f -O quota ${ROOT}
 done_msg
 
 echo "build subvolumes..."
@@ -128,11 +128,11 @@ ${MNTO}=users,${SAFE} ${ROOT} /mnt/home
 ${MNTO}=services,${SAFE} ${ROOT} /mnt/srv
 ${MNTO}=variable,${SAFE} ${ROOT} /mnt/var
 
-mkdir -p /mnt/var/lib/lxd/{containers,virtual-machines,storage-pools}
+mkdir -p /mnt/var/lib/incus/{containers,virtual-machines,storage-pools}
 mkdir -p /mnt/{var/log,var/tmp,var/cache,var/.snapshots,var/.swap}
-${MNTO}=containers,${SAFE} ${ROOT} /mnt/var/lib/lxd/containers
-${MNTO}=virtual-machines,${SAFE} ${ROOT} /mnt/var/lib/lxd/virtual-machines
-${MNTO}=storage-pools,${SAFE} ${ROOT} /mnt/var/lib/lxd/storage-pools
+${MNTO}=containers,${SAFE} ${ROOT} /mnt/var/lib/incus/containers
+${MNTO}=virtual-machines,${SAFE} ${ROOT} /mnt/var/lib/incus/virtual-machines
+${MNTO}=storage-pools,${SAFE} ${ROOT} /mnt/var/lib/incus/storage-pools
 ${MNTO}=logs,${LOCKED} ${ROOT} /mnt/var/log
 ${MNTO}=temporary,${SAFE} ${ROOT} /mnt/var/tmp
 ${MNTO}=cache,${SAFE} ${ROOT} /mnt/var/cache
@@ -146,13 +146,15 @@ done_msg
 
 echo "mount esp..."
 mkdir /mnt/boot/efi
-mount -t vfat -o $LOCKED $ESP /mnt/boot/efi
+mount -t vfat -o $LOCKED $BOOT /mnt/boot/efi
 done_msg
 
 echo
 echo "intended output: 2 partitions and 13 subvolumes"
 findmnt -R /mnt
 read -p "enter to continue to package install > "
+
+CHRT="arch-chroot /mnt /bin/bash -c "
 
 echo "package install..."
 mapfile -t packages < <(grep -vE '^\s*#|^\s*$' ./root/etc/packages.conf)
@@ -163,10 +165,10 @@ ${CHRT}"chmod +x /opt/install/post-install.sh"
 done_msg
 
 echo "fstab..."
-fstabgen -U /mnt >> /mnt/etc/fstab
+genfstab -U /mnt >> /mnt/etc/fstab
 done_msg
 
-CHRT="artix-chroot /mnt /bin/bash -c "
+
 
 echo "region and time..."
 echo "region"
@@ -210,15 +212,16 @@ ${CHRT}"sed -i 's|^root:x:0:0:root:/root:/bin/bash|root:x:0:0:root:/:/sbin/nolog
 rm -rf /mnt/root"
 done_msg
 
-echo "grub..."
-${CHRT}"grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB"
-${CHRT}"grub-mkconfig -o /boot/grub/grub.cfg"
+echo "bootloader..."
+${CHRT}"bootctl install"
+#${CHRT}"grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB"
+#${CHRT}"grub-mkconfig -o /boot/grub/grub.cfg"
 ${CHRT}"mkinitcpio -P"
 done_msg
 
 echo "networking..."
-${CHRT}"ln -s /etc/dinit.d/dhcpcd /etc/dinit.d/boot.d/"
-echo "nameserver 2606:4700:4700::1111 # Cloudflare\nnameserver 2620:fe::fe # Quad9" > /mnt/etc/resolv.conf
+#${CHRT}"ln -s /etc/dinit.d/dhcpcd /etc/dinit.d/boot.d/"
+#echo "nameserver 2606:4700:4700::1111 # Cloudflare\nnameserver 2620:fe::fe # Quad9" > /mnt/etc/resolv.conf
 
 done_msg
 
@@ -232,7 +235,7 @@ echo -e "\n/var/.swap/swapfile none swap defaults 0 0" >> /mnt/etc/fstab
 done_msg
 
 echo "filesystem settings..."
-${CHRT}"chattr +C /var/lib/lxd/virtual-machines /var/lib/lxd/containers /var/.swap"
+${CHRT}"chattr +C /var/lib/incus/virtual-machines /var/lib/incus/containers /var/.swap"
 ${CHRT}"chmod 700 /var/.swap /var/cache/pacman /var/.snapshots /boot /etc/fstab"
 ${CHRT}"chown -R alpm:alpm /var/cache/pacman"
 done_msg
