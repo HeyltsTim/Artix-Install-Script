@@ -216,6 +216,7 @@ echo "bootloader..."
 ${CHRT}"bootctl install"
 #${CHRT}"grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB"
 #${CHRT}"grub-mkconfig -o /boot/grub/grub.cfg"
+${CHRT}"systemctl enable systemd-boot-update.service"
 ${CHRT}"mkinitcpio -P"
 done_msg
 
