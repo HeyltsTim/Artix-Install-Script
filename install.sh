@@ -218,9 +218,11 @@ ${CHRT}"mkinitcpio -P"
 done_msg
 
 echo "networking..."
-${CHRT}"systemctl enable systemd-networkd systemd-resolved"
-
+${CHRT}"systemctl enable systemd-networkd systemd-resolved reflector sensord shadow smartd systemd-timesyncd systemd-time-wait-sync ufw systemd-hostnamed uuid reflector.timer shadow shadow.timer"
 done_msg
+
+echo "other services..."
+${CHRT}"systemctl enable incus"
 
 echo "swapfile..."
 read -p "swap size in gigabytes > " SWAP 
