@@ -218,8 +218,7 @@ ${CHRT}"mkinitcpio -P"
 done_msg
 
 echo "networking..."
-#${CHRT}"ln -s /etc/dinit.d/dhcpcd /etc/dinit.d/boot.d/"
-#echo "nameserver 2606:4700:4700::1111 # Cloudflare\nnameserver 2620:fe::fe # Quad9" > /mnt/etc/resolv.conf
+${CHRT}"systemctl enable systemd-networkd systemd-resolved"
 
 done_msg
 
