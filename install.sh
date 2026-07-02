@@ -144,9 +144,8 @@ ${MNTO}=packages,${SAFE} ${ROOT} /mnt/var/cache/pacman/pkg
 
 done_msg
 
-echo "mount esp..."
-mkdir /mnt/boot/efi
-mount -t vfat -o $LOCKED $BOOT /mnt/boot/efi
+echo "mount boot..."
+mount -t vfat -o $LOCKED $BOOT /mnt/boot
 done_msg
 
 echo
@@ -158,7 +157,7 @@ CHRT="arch-chroot /mnt /bin/bash -c "
 
 echo "package install..."
 mapfile -t packages < <(grep -vE '^\s*#|^\s*$' ./root/etc/packages.conf)
-basestrap -Ki /mnt ${packages[@]}
+pacstrap -Ki /mnt ${packages[@]}
 mkdir -p /mnt/opt/install
 cp -r ./root/. /mnt
 ${CHRT}"chmod +x /opt/install/post-install.sh"
