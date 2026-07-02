@@ -218,7 +218,7 @@ ${CHRT}"mkinitcpio -P"
 done_msg
 
 echo "networking..."
-${CHRT}"systemctl enable systemd-networkd systemd-resolved reflector sensord shadow smartd systemd-timesyncd systemd-time-wait-sync ufw systemd-hostnamed uuid reflector.timer shadow shadow.timer"
+${CHRT}"systemctl enable systemd-networkd systemd-resolved reflector lm_sensors gpm sudo_logsrvd systemd-oomd udisks2 paccache.timer reflector.timer fstrim.timer pacman-filesdb-refresh.timer rsyncd sensord apparmor auditd audit-rules dbus-broker dropbear fail2ban shadow smartd systemd-timesyncd systemd-time-wait-sync ufw systemd-hostnamed uuid reflector.timer shadow shadow.timer"
 done_msg
 
 echo "other services..."
