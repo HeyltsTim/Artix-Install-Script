@@ -232,10 +232,11 @@ ${CHRT}"mkswap /var/.swap/swapfile"
 echo -e "\n/var/.swap/swapfile none swap defaults 0 0" >> /mnt/etc/fstab
 done_msg
 
-echo "filesystem settings..."
+echo "filesystem..."
 ${CHRT}"chattr +C /var/lib/incus/virtual-machines /var/lib/incus/containers /var/.swap"
 ${CHRT}"chmod 700 /var/.swap /var/cache/pacman /var/.snapshots /boot /etc/fstab"
 ${CHRT}"chown -R alpm:alpm /var/cache/pacman"
+rm -rf /mnt/etc{logrotate.d,cron.hourly}
 done_msg
 
 echo "unmount filesystems..."
