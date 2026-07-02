@@ -123,7 +123,7 @@ MNTO="mount -o subvol"
 ${MNTO}=root,${OPT} ${ROOT} /mnt
 
 mkdir -p /mnt/{boot,home,srv,var}
-${MNTO}=boot,${LOCKED} ${ROOT} /mnt/boot
+#${MNTO}=boot,${LOCKED} ${ROOT} /mnt/boot
 ${MNTO}=users,${SAFE} ${ROOT} /mnt/home
 ${MNTO}=services,${SAFE} ${ROOT} /mnt/srv
 ${MNTO}=variable,${SAFE} ${ROOT} /mnt/var
@@ -145,7 +145,7 @@ ${MNTO}=packages,${SAFE} ${ROOT} /mnt/var/cache/pacman/pkg
 done_msg
 
 echo "mount boot..."
-mount -t vfat -o $LOCKED $BOOT /mnt/boot
+mount -t vfat -o "${LOCKED},fmask=0177,dmask=0077" ${BOOT} /mnt/boot
 done_msg
 
 echo
